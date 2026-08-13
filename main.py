@@ -33,7 +33,7 @@ db.commit()
 
 
 
-bot = Bot(token=os.getenv("8940343469:AAHYG6SAppqBy43oPB0CKwRxdOk2uIcdQUc"))
+bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
 
 class Reviews(StatesGroup):
