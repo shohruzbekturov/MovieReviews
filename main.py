@@ -7,6 +7,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.types import CallbackQuery
 import sqlite3
+import os
+from aiohttp import web
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 
 db = sqlite3.connect("movie_reviews.db")
@@ -30,7 +33,7 @@ db.commit()
 
 
 
-bot = Bot(token="8940343469:AAHYG6SAppqBy43oPB0CKwRxdOk2uIcdQUc")
+bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
 
 class Reviews(StatesGroup):
@@ -181,9 +184,33 @@ async def review_selected(callback: CallbackQuery):
 
 
 
-if __name__ == '__main__':
-    asyncio.run(dp.start_polling(bot))
+async def main():
+    app = web.Application()
+
+    webhook_handler = SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot
+    )
+
+    webhook_handler.register(
+        app,
+        path="/webhook"
+    )
+
+    setup_application(app, dp, bot=bot)
+
+    webhook_url = os.getenv("RENDER_EXTERNAL_URL") + "/webhook"
+
+    await bot.set_webhook(webhook_url)
+
+    port = int(os.getenv("PORT", 10000))
+
+    return web.run_app(
+        app,
+        host="0.0.0.0",
+        port=port
+    )
 
 
-
-
+if __name__ == "__main__":
+    asyncio.run(main())
