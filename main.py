@@ -186,15 +186,17 @@ async def review_selected(callback: CallbackQuery):
 
 async def on_startup(app):
     render_url = os.getenv("RENDER_EXTERNAL_URL")
-    print("RENDER URL:", render_url)
+    webhook_url = render_url + "/webhook"
 
-    if render_url:
-        webhook_url = render_url + "/webhook"
-        print("SETTING WEBHOOK:", webhook_url)
-        await bot.set_webhook(webhook_url)
-        print("WEBHOOK SET!")
-    else:
-        print("RENDER_EXTERNAL_URL IS MISSING!")
+    print("SETTING WEBHOOK:", webhook_url)
+
+    await bot.set_webhook(webhook_url)
+
+    info = await bot.get_webhook_info()
+
+    print("WEBHOOK AFTER SET:", info.url)
+    print("PENDING:", info.pending_update_count)
+    print("LAST ERROR:", info.last_error_message)
 
 async def on_shutdown(app):
     await bot.delete_webhook()
