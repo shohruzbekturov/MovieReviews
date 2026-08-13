@@ -184,31 +184,34 @@ async def review_selected(callback: CallbackQuery):
 
 
 
-async def main():
-    app = web.Application()
-
-    webhook_handler = SimpleRequestHandler(
-        dispatcher=dp,
-        bot=bot
-    )
-
-    webhook_handler.register(
-        app,
-        path="/webhook"
-    )
-
-    setup_application(app, dp, bot=bot)
-
+async def on_startup(app):
     webhook_url = os.getenv("RENDER_EXTERNAL_URL") + "/webhook"
-
     await bot.set_webhook(webhook_url)
 
-    return app
+
+async def on_shutdown(app):
+    await bot.delete_webhook()
+
+
+app = web.Application()
+
+webhook_handler = SimpleRequestHandler(
+    dispatcher=dp,
+    bot=bot
+)
+
+webhook_handler.register(
+    app,
+    path="/webhook"
+)
+
+setup_application(app, dp, bot=bot)
+
+app.on_startup.append(on_startup)
+app.on_shutdown.append(on_shutdown)
 
 
 if __name__ == "__main__":
-    app = asyncio.run(main())
-
     port = int(os.getenv("PORT", 10000))
 
     web.run_app(
@@ -216,6 +219,4 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=port
     )
-
-
 
