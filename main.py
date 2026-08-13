@@ -186,8 +186,8 @@ async def review_selected(callback: CallbackQuery):
 
 async def on_startup(app):
     webhook_url = os.getenv("RENDER_EXTERNAL_URL") + "/webhook"
+    print("WEBHOOK URL:", webhook_url)
     await bot.set_webhook(webhook_url)
-
 
 async def on_shutdown(app):
     await bot.delete_webhook()
